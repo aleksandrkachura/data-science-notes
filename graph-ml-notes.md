@@ -1,7 +1,7 @@
 # Graph Machine Learning Notes
 
 ## Graph Laplacian
-Let $A$ &mdash; graph adjacency matrix. \
+Let $A$ &mdash; graph adjacency matrix. <br>
 Let $D$ &mdash; graph degree matrix, that means $D = (\deg(v_1), \ldots, \deg(v_n))$. <br>
 **Graph Laplacian matrix** is defined by the formula
 $$L = D - A.$$
