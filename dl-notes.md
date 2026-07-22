@@ -8,7 +8,12 @@ Parameters are called **weights**.
 ### MLP
 ### CNN
 ### RNN
+#### GRU
+[Original paper](https://arxiv.org/abs/1406.1078)
+#### LSTM
+[Original paper](https://deeplearning.cs.cmu.edu/S23/document/readings/LSTM.pdf)
 ### Transformer
+[Original paper](https://arxiv.org/abs/1706.03762)
 ### Graph Neural Network
 
 ## Optimization
