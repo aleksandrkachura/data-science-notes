@@ -32,3 +32,15 @@ A [paper](https://arxiv.org/pdf/1704.01212) with a good review of several MPNN a
 
 ### Spectral Attention Network (SAN)
 [Original paper](https://arxiv.org/abs/2106.03893)
+
+## Generative Models on Graphs
+### Generative Diffusion Models on Graphs
+#### EDP-GNN
+[Original paper](https://arxiv.org/abs/2003.00638) <br>
+It is the very first score matching based diffusion method for undirected graph generation.
+#### DiGress
+[Original paper](https://arxiv.org/abs/2209.14734)
+This method extends the DDPM algorithm to
+generate graphs with categorical node and edge attributes.
+####
+#### DiPhon???
