@@ -36,9 +36,14 @@ A [paper](https://arxiv.org/pdf/1704.01212) with a good review of several MPNN a
 
 
 ## Generative Models on Graphs
+### Generative Diffusion Models on Graphs
 [Good survey](https://arxiv.org/abs/2302.02591)
 
-### Generative Diffusion Models on Graphs
+Three paradigms of diffusion models:
+- Score Matching with Langevin Dynamics (SMLD).
+- Denoising Diffusion Probabilistic Model (DDPM).
+- Score-based Generative Model (SGM).
+
 #### EDP-GNN
 [Original paper](https://arxiv.org/abs/2003.00638) <br>
 It is the very first score matching based diffusion method for undirected graph generation.
