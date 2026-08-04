@@ -1,6 +1,7 @@
 # Graph Machine Learning Notes
 
-## Graph Laplacian
+## Graph Theory Basics
+**Graph** $G$ &mdash; a pair $(V, E)$, where $V$ is a set of nodes, $E$ is a set of edges. <br>
 Let $A$ &mdash; graph adjacency matrix. <br>
 Let $D$ &mdash; graph degree matrix, that means $D = (\deg(v_1), \ldots, \deg(v_n))$. <br>
 **Graph Laplacian matrix** is defined by the formula
@@ -33,11 +34,17 @@ A [paper](https://arxiv.org/pdf/1704.01212) with a good review of several MPNN a
 ### Spectral Attention Network (SAN)
 [Original paper](https://arxiv.org/abs/2106.03893)
 
+
 ## Generative Models on Graphs
+[Good survey](https://arxiv.org/abs/2302.02591)
+
 ### Generative Diffusion Models on Graphs
 #### EDP-GNN
 [Original paper](https://arxiv.org/abs/2003.00638) <br>
 It is the very first score matching based diffusion method for undirected graph generation.
+
+This model can generate only adjacency matrices, not attributes.
+
 #### DiGress
 [Original paper](https://arxiv.org/abs/2209.14734)
 This method extends the DDPM algorithm to
