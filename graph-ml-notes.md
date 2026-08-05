@@ -37,7 +37,9 @@ A [paper](https://arxiv.org/pdf/1704.01212) with a good review of several MPNN a
 
 ## Generative Models on Graphs
 ### Generative Diffusion Models on Graphs
-[Good survey](https://arxiv.org/abs/2302.02591)
+Some surveys:
+- [Survey 1](https://arxiv.org/abs/2302.02591)
+- [Survey 2](https://arxiv.org/abs/2401.15617v2)
 
 Three paradigms of diffusion models:
 - Score Matching with Langevin Dynamics (SMLD).
@@ -56,3 +58,7 @@ This method extends the DDPM algorithm to
 generate graphs with categorical node and edge attributes.
 ####
 #### DiPhon???
+
+### Applications of Generative Diffusion Models on Graphs
+- AI for scientific research
+- Computer vision
