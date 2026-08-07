@@ -53,12 +53,15 @@ It is the very first score matching based diffusion method for undirected graph 
 This model can generate only adjacency matrices, not attributes.
 
 #### DiGress
-[Original paper](https://arxiv.org/abs/2209.14734)
+[Original paper](https://arxiv.org/abs/2209.14734)<br>
 This method extends the DDPM algorithm to
 generate graphs with categorical node and edge attributes.
-####
-#### DiPhon???
+#### GDSS (Graph Diffusion via the System of Stochastic differential equations)
+[Original paper](https://proceedings.mlr.press/v162/jo22a/jo22a.pdf)
+#### GSDM (Graph Spectral Diffusion Model)
 
 ### Applications of Generative Diffusion Models on Graphs
-- AI for scientific research
-- Computer vision
+- Molecule generation (e. g., ...)
+- Protein design (e.g., [Graph denoising diffusion for inverse protein folding](https://proceedings.neurips.cc/paper_files/paper/2023/file/20888d00c5df685de2c09790040e0327-Paper-Conference.pdf))
+- Computer vision (e. g., ...)
+- Multi-agent coordination ([Graph Diffusion for Robust Multi-Agent Coordination](https://raw.githubusercontent.com/mlresearch/v267/main/assets/zeng25f/zeng25f.pdf))
