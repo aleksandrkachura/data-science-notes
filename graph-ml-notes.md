@@ -4,40 +4,32 @@
 
 A graph is commonly written as
 
-\[
-G = (V, E),
-\]
+$G = (V, E)$,
 
 where:
 
-- \(V\) is the set of nodes, also called vertices.
-- \(E\) is the set of edges, also called links.
+- $V$ is the set of nodes, also called vertices.
+- $E$ is the set of edges, also called links.
 
 Let
 
-\[
-|V| = n
-\]
+$|V| = n$
 
 be the number of nodes and
 
-\[
-|E| = m
-\]
+$|E| = m$
 
 be the number of edges.
 
-A node \(v \in V\) represents an entity, object, or event.
+A node $v \in V$ represents an entity, object, or event.
 
-An edge \(e \in E\) represents a relationship, interaction, or connection between nodes.
+An edge $e \in E$ represents a relationship, interaction, or connection between nodes.
 
-For an edge connecting nodes \(u\) and \(v\), we may write
+For an edge connecting nodes $u$ and $v$, we may write
 
-\[
-e = (u,v).
-\]
+$e = (u,v).$
 
-Depending on the graph type, \((u,v)\) may be equivalent to \((v,u)\), or the two may represent different relationships.
+Depending on the graph type, $(u,v)$ may be equivalent to $(v,u)$, or the two may represent different relationships.
 
 ---
 
@@ -1495,6 +1487,7 @@ A [paper](https://arxiv.org/pdf/1704.01212) with a good review of several MPNN a
 
 ## Generative Models on Graphs
 ### Generative Diffusion Models on Graphs
+<!--
 Some surveys:
 - [Survey 1](https://arxiv.org/abs/2302.02591)
 - [Survey 2](https://arxiv.org/abs/2401.15617v2)
@@ -1509,11 +1502,17 @@ Three paradigms of diffusion models:
 It is the very first score matching based diffusion method for undirected graph generation.
 
 This model can generate only adjacency matrices, not attributes.
+-->
 
 #### DiGress
 [Original paper](https://arxiv.org/abs/2209.14734)<br>
 This method extends the DDPM algorithm to
 generate graphs with categorical node and edge attributes.
+
+#### GraphARM
+[Original paper](https://arxiv.org/abs/2307.08849)
+
+<!--
 #### GDSS (Graph Diffusion via the System of Stochastic differential equations)
 [Original paper](https://proceedings.mlr.press/v162/jo22a/jo22a.pdf)
 #### GSDM (Graph Spectral Diffusion Model)
@@ -1523,3 +1522,4 @@ generate graphs with categorical node and edge attributes.
 - Protein design (e.g., [Graph denoising diffusion for inverse protein folding](https://proceedings.neurips.cc/paper_files/paper/2023/file/20888d00c5df685de2c09790040e0327-Paper-Conference.pdf))
 - Computer vision (e. g., ...)
 - Multi-agent coordination ([Graph Diffusion for Robust Multi-Agent Coordination](https://raw.githubusercontent.com/mlresearch/v267/main/assets/zeng25f/zeng25f.pdf))
+-->
