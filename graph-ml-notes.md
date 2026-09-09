@@ -1001,52 +1001,45 @@ This motivates geometric deep learning, which aims to respect symmetries such as
 
 ## 16.1 Adjacency matrix
 
-For a graph with \(n\) nodes, the adjacency matrix is
+For a graph with $n$ nodes, the adjacency matrix is
 
-\[
+$$
 A \in \mathbb{R}^{n \times n}.
-\]
+$$
 
 For an unweighted graph:
 
-\[
-A_{uv}
-=
+$$A_{uv} =
 \begin{cases}
 1 & \text{if } (u,v) \in E,\\
 0 & \text{otherwise.}
-\end{cases}
-\]
+\end{cases}$$
 
-For a weighted graph, \(A_{uv}\) may equal the edge weight \(w_{uv}\).
+For a weighted graph, $A_{uv}$ may equal the edge weight $w_{uv}$.
 
-For an undirected graph:
+For an undirected graph: $$A = A^\top.$$
 
-\[
-A = A^\top.
-\]
-
-For a directed graph, \(A\) is not necessarily symmetric.
+For a directed graph, $A$ is not necessarily symmetric.
 
 ---
 
 ## 16.2 Degree matrix
 
-For an undirected graph, the degree of node \(v\) is
+For an undirected graph, the degree of node $v$ is
 
-\[
+$$
 d_v = \sum_u A_{vu}.
-\]
+$$
 
 The degree matrix is diagonal:
 
-\[
+$$
 D_{vv}=d_v.
-\]
+$$
 
 That is,
 
-\[
+$$
 D =
 \begin{bmatrix}
 d_1 & 0 & \cdots & 0\\
@@ -1054,7 +1047,7 @@ d_1 & 0 & \cdots & 0\\
 \vdots & \vdots & \ddots & \vdots\\
 0 & 0 & \cdots & d_n
 \end{bmatrix}.
-\]
+$$
 
 For directed graphs, we distinguish:
 
@@ -1065,9 +1058,9 @@ For directed graphs, we distinguish:
 
 ## 16.3 Node feature matrix
 
-If each node has a \(d\)-dimensional feature vector,
+If each node has a $$d$$-dimensional feature vector,
 
-\[
+$$
 X =
 \begin{bmatrix}
 \mathbf{x}_1^\top\\
@@ -1076,13 +1069,13 @@ X =
 \mathbf{x}_n^\top
 \end{bmatrix}
 \in \mathbb{R}^{n \times d}.
-\]
+$$
 
 The graph input may therefore be represented by
 
-\[
+$$
 (A,X).
-\]
+$$
 
 ---
 
@@ -1115,11 +1108,11 @@ edge_features:
 
 An incidence matrix describes which nodes belong to which edges.
 
-For an undirected graph with \(n\) nodes and \(m\) edges:
+For an undirected graph with $$n$$ nodes and $$m$$ edges:
 
-\[
+$$
 B \in \mathbb{R}^{n \times m}.
-\]
+$$
 
 Each column corresponds to one edge.
 
@@ -1133,17 +1126,17 @@ Most real-world graphs are sparse.
 
 A graph is sparse when
 
-\[
+$$
 m \ll n^2.
-\]
+$$
 
-A dense adjacency matrix requires \(O(n^2)\) storage, which can be impractical for large graphs.
+A dense adjacency matrix requires $O(n^2)$ storage, which can be impractical for large graphs.
 
 Sparse graph algorithms instead work with the edge list and typically require storage proportional to
 
-\[
+$$
 O(n+m).
-\]
+$$
 
 Examples of sparse graphs:
 
@@ -1212,9 +1205,9 @@ Examples:
 
 Typical output:
 
-\[
+$$
 \hat{y}_v = f_\theta(G,v).
-\]
+$$
 
 ---
 
@@ -1231,9 +1224,9 @@ Examples:
 
 Typical output:
 
-\[
+$$
 \hat{y}_{uv} = f_\theta(G,u,v).
-\]
+$$
 
 ---
 
@@ -1250,9 +1243,9 @@ Examples:
 
 Typical output:
 
-\[
+$$
 \hat{y}_G = f_\theta(G).
-\]
+$$
 
 ---
 
@@ -1275,21 +1268,21 @@ The ordering of nodes in a graph is arbitrary.
 
 If we permute the rows and columns of the adjacency matrix and reorder the corresponding node features, the underlying graph has not changed.
 
-Let \(P\) be a permutation matrix. Then a relabeled graph can be represented as
+Let $P$ be a permutation matrix. Then a relabeled graph can be represented as
 
-\[
+$$
 A' = P A P^\top,
-\]
+$$
 
-\[
+$$
 X' = P X.
-\]
+$$
 
 A graph-level prediction should remain unchanged:
 
-\[
+$$
 f(A,X) = f(PAP^\top, PX).
-\]
+$$
 
 This property is called permutation invariance.
 
@@ -1303,7 +1296,7 @@ Graph neural networks are generally designed to satisfy these properties.
 
 A typical message-passing layer has the form
 
-\[
+$$
 \mathbf{h}_v^{(k+1)}
 =
 \operatorname{UPDATE}^{(k)}
@@ -1316,7 +1309,7 @@ A typical message-passing layer has the form
 \right\}
 \right)
 \right).
-\]
+$$
 
 The graph type influences this equation.
 
@@ -1324,25 +1317,25 @@ The graph type influences this equation.
 
 Use a neighborhood without direction:
 
-\[
+$$
 \mathcal{N}(v).
-\]
+$$
 
 ### Directed graph
 
 Use separate incoming and outgoing neighborhoods:
 
-\[
+$$
 \mathcal{N}_{\text{in}}(v),
 \qquad
 \mathcal{N}_{\text{out}}(v).
-\]
+$$
 
 ### Edge-attributed graph
 
 Include edge features:
 
-\[
+$$
 \mathbf{h}_v^{(k+1)}
 =
 \operatorname{UPDATE}
@@ -1355,25 +1348,25 @@ Include edge features:
 \mathbf{e}_{uv}
 \right)
 \right).
-\]
+$$
 
 ### Heterogeneous graph
 
 Use relation-specific message functions:
 
-\[
+$$
 \mathbf{m}_v
 =
 \sum_{r \in \mathcal{R}}
 \sum_{u \in \mathcal{N}_r(v)}
 \psi_r(\mathbf{h}_u).
-\]
+$$
 
 ### Dynamic graph
 
 Include time:
 
-\[
+$$
 \mathbf{h}_v(t)
 =
 f_\theta
@@ -1381,7 +1374,7 @@ f_\theta
 G_{\leq t},
 v,t
 \right).
-\]
+$$
 
 Thus, graph classification is not only terminology. It determines how information should be represented and propagated.
 
@@ -1486,6 +1479,16 @@ A [paper](https://arxiv.org/pdf/1704.01212) with a good review of several MPNN a
 
 
 ## Generative Models on Graphs
+### Graph Generative Models
+**Given:** graphs sampled from $p_{\text{data}}(G)$.
+**Goals:**
+- Learn the distribution $p_{\text{model}}(G)$.
+- Sample from $p_{\text{model}}(G)$.
+
+### Generative Model Basics
+### Deep Generative Models
+### GraphVAE
+### GraphRNN
 ### Generative Diffusion Models on Graphs
 <!--
 Some surveys:
