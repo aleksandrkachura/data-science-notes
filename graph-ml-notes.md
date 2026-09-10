@@ -1479,16 +1479,45 @@ A [paper](https://arxiv.org/pdf/1704.01212) with a good review of several MPNN a
 
 
 ## Generative Models on Graphs
-### Graph Generative Models
-**Given:** graphs sampled from $p_{\text{data}}(G)$.
+### Problem statement
+**Given:**
+- a set of graphs $\{G_i\}$ sampled from the data distribution $p_{\text{data}}(G)$.
+- the model distribution $p_{\text{model}}(G; \theta)$ with parameters $\theta$.
+
 **Goals:**
-- Learn the distribution $p_{\text{model}}(G)$.
-- Sample from $p_{\text{model}}(G)$.
+- *Density estimation:* to learn the distribution $p_{\text{model}}(G; \theta)$.
+- *Sampling:* to generate new graphs from $p_{\text{model}}(G; \theta)$.
 
 ### Generative Model Basics
 ### Deep Generative Models
-### GraphVAE
 ### GraphRNN
+[Original paper](https://arxiv.org/abs/1802.08773)
+
+**Autoregressive approach:** $p_{\text{model}}(G; \theta)$ is used for both density estimation and sampling. \
+**Idea &mdash; chain rule:**
+$$p_{\text{model}}(G; \theta) = \prod \limits_{t = 1}^n p_{\text{model}}(G_t | G_1, \ldots, G_{t - 1}; \theta).$$
+
+**GraphRNN idea:** generating graphs via sequentially adding nodes and edges.
+
+Graph $G$ with node ordering $\pi$ can be uniquely mapped into a sequence of node and edge additions $S^{\pi}$.
+
+The sequence $S^{\pi}$ has 2 levels
+($S$ is a sequence of sequences):
+- Node-level: add nodes, one at a time.
+- Edge-level: add edges between existing nodes.
+
+**Node-level:** at each step, a new node is added.
+
+Each node-level step is an edge-level sequence. \
+**Edge-level:** at each step, add a new edge.
+
+GraphRNN has a node-level RNN and an
+edge-level RNN. \
+Relationship between the two RNNs:
+- Node-level RNN generates the initial state for edge-level RNN.
+- Edge-level RNN sequentially predict if the new node will connect to each of the previous node.
+
+### GraphVAE
 ### Generative Diffusion Models on Graphs
 <!--
 Some surveys:
