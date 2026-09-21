@@ -71,7 +71,7 @@ At generation step $i$, node $\pi(v_i)$ is added to the partially constructed gr
 
 Define the adjacency vector
 
-$$S_i^\pi = \left(S^\pi_{i,1}, S^\pi_{i,2},\ldots, S^\pi_{i,i-1}\right).$$
+$$S_i^\pi = (S^\pi_{i,1}, S^\pi_{i,2},\ldots, S^\pi_{i,i-1}).$$
 
 The $j$-th component is
 
@@ -152,11 +152,11 @@ The node-level RNN provides the initial state of the edge-level RNN. After the e
 
 The probability of a graph-generation sequence is factorized as
 
-$$p(S^\pi)=\prod_{i=1}^{n}p\left(S^\pi_i\mid S^\pi_{<i}\right),$$
+$$p(S^\pi) = \prod_{i=1}^{n} p(S^\pi_i\mid S^\pi_{<i}),$$
 
 where
 
-$$S^\pi_{<i}=(S^\pi_1,\ldots,S^\pi_{i-1}).$$
+$$S^\pi_{<i} = (S^\pi_1, \ldots, S^\pi_{i-1}).$$
 
 Because graphs may have different numbers of nodes, an end-of-sequence symbol is introduced:
 
@@ -164,7 +164,7 @@ $$S^\pi_{n+1}=\texttt{EOS}.$$
 
 Therefore,
 
-$$p(S^\pi)=\prod_{i=1}^{n+1}p\left(S^\pi_i\mid S^\pi_{<i}\right).$$
+$$p(S^\pi) = \prod_{i=1}^{n+1} p(S^\pi_i \mid S^\pi_{<i}).$$
 
 The EOS symbol indicates that no additional node should be generated.
 
@@ -194,7 +194,7 @@ At generation time:
 
 The graph distribution induced by the sequence model is
 
-$$p_{\mathrm{model}}(G) = \sum_{S^\pi}p_{\mathrm{model}}(S^\pi) \mathbb{I}\!\left[f_G(S^\pi)=G\right],$$
+$$p_{\mathrm{model}}(G) = \sum_{S^\pi} p_{\mathrm{model}}(S^\pi) \mathbb{I}[f_G(S^\pi)=G],$$
 
 where $f_G$ reconstructs a graph from its sequence.
 
@@ -254,7 +254,7 @@ This model is simple but cannot explicitly condition edge $j$ on decisions for e
 
 The full GraphRNN model introduces a second RNN for the edge sequence of each new node:
 
-$$p(S^\pi_i\mid S^\pi_{<i}) = \prod_{j=1}^{i-1} p\left(S^\pi_{i,j}\mid S^\pi_{i,<j},S^\pi_{<i}\right),$$
+$$p(S^\pi_i\mid S^\pi_{<i}) = \prod_{j=1}^{i-1} p(S^\pi_{i,j} \mid S^\pi_{i,<j},S^\pi_{<i}),$$
 
 where
 
@@ -295,7 +295,7 @@ $$0,1,1,0.$$
 
 For a Bernoulli prediction with target $y\in\{0,1\}$ and predicted probability $\hat y$, the loss is
 
-$$\ell_{\mathrm{BCE}} = -\left[y\log\hat y+(1-y)\log(1-\hat y)\right].$$
+$$\ell_{\mathrm{BCE}} = -[y\log\hat y+(1-y)\log(1-\hat y)].$$
 
 The total negative log-likelihood is
 
@@ -392,7 +392,7 @@ $$S^\pi_i=(A^\pi_{i,1},\ldots,A^\pi_{i,i-1}),$$
 
 use
 
-$$S^\pi_i = \left(A^\pi_{i,\max(1,i-M)},\ldots,A^\pi_{i,i-1}\right).$$
+$$S^\pi_i = (A^\pi_{i,\max(1,i-M)}, \ldots, A^\pi_{i,i-1}).$$
 
 After padding, every edge-level input has dimension $M$.
 
