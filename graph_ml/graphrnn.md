@@ -43,28 +43,17 @@ Thus, a graph is not naturally represented by a single fixed vector. GraphRNN ad
 
 An autoregressive model represents a joint distribution using the chain rule. For a sequence $x_1,\ldots,x_T$,
 
-$$
-p(x_1,\ldots,x_T)
-=
-\prod_{t=1}^{T}
- p(x_t\mid x_1,\ldots,x_{t-1}).
-$$
+$$p(x_1,\ldots,x_T) = \prod_{t=1}^{T} p(x_t\mid x_1,\ldots,x_{t-1}).$$
 
 The model generates one element at a time. At step $t$, it predicts the next element conditioned on everything generated previously.
 
 For example,
 
-$$
-p(x_1,\ldots,x_T)
-=
-p(x_1)p(x_2\mid x_1)p(x_3\mid x_1,x_2)\cdots.
-$$
+$$p(x_1,\ldots,x_T) = p(x_1)p(x_2\mid x_1)p(x_3\mid x_1,x_2)\cdots.$$
 
 During training, the conditional distributions are fitted by maximum likelihood. Given training sequences $x^{(1)},\ldots,x^{(N)}$, we maximize
 
-$$
-\mathcal{L}(\theta)=\sum_{k=1}^{N}\log p_{\mathrm{model}}(x^{(k)};\theta).
-$$
+$$\mathcal{L}(\theta)=\sum_{k=1}^{N}\log p_{\mathrm{model}}(x^{(k)};\theta).$$
 
 During generation, the model samples $x_1$, then $x_2$ conditioned on $x_1$, and so on.
 
@@ -74,9 +63,7 @@ GraphRNN applies this principle to a graph-construction sequence.
 
 Consider an undirected graph $G=(V,E)$ with $n$ nodes. Choose an ordering of the nodes,
 
-$$
-\pi(v_1),\pi(v_2),\ldots,\pi(v_n).
-$$
+$$\pi(v_1),\pi(v_2),\ldots,\pi(v_n).$$
 
 The ordering determines the order in which nodes will be generated.
 
@@ -84,32 +71,23 @@ At generation step $i$, node $\pi(v_i)$ is added to the partially constructed gr
 
 Define the adjacency vector
 
-$$
-S_i^\pi=
-\left(S^\pi_{i,1}, S^\pi_{i,2},\ldots, S^\pi_{i,i-1}\right).
-$$
+$$S_i^\pi = \left(S^\pi_{i,1}, S^\pi_{i,2},\ldots, S^\pi_{i,i-1}\right).$$
 
 The $j$-th component is
 
-$$
-S^\pi_{i,j}=
+$$S^\pi_{i,j}=
 \begin{cases}
 1, & \text{if }(\pi(v_i),\pi(v_j))\in E,\\
 0, & \text{otherwise}.
-\end{cases}
-$$
+\end{cases}$$
 
 Therefore,
 
-$$
-S^\pi_i\in\{0,1\}^{i-1}.
-$$
+$$S^\pi_i\in\{0,1\}^{i-1}.$$
 
 The first node has no previous nodes, so $S^\pi_1=\varnothing$. The complete graph is represented by
 
-$$
-S^\pi=(S^\pi_1,S^\pi_2,\ldots,S^\pi_n).
-$$
+$$S^\pi=(S^\pi_1,S^\pi_2,\ldots,S^\pi_n).$$
 
 For an undirected graph, the sequence uniquely determines the graph once the ordering is fixed.
 
@@ -117,24 +95,20 @@ For an undirected graph, the sequence uniquely determines the graph once the ord
 
 Suppose
 
-$$
-A^\pi=
+$$A^\pi=
 \begin{pmatrix}
 0&1&0&0\\
 1&0&1&1\\
 0&1&0&0\\
 0&1&0&0
-\end{pmatrix}.
-$$
+\end{pmatrix}.$$
 
 Then
 
-$$
-S^\pi_1=\varnothing,
+$$S^\pi_1=\varnothing,
 \qquad S^\pi_2=(1),
 \qquad S^\pi_3=(0,1),
-\qquad S^\pi_4=(0,1,0).
-$$
+\qquad S^\pi_4=(0,1,0).$$
 
 The construction is:
 
@@ -149,9 +123,7 @@ The graph-generation problem has become a sequence-generation problem.
 
 The sequence $S^\pi$ has a hierarchical structure:
 
-$$
-S^\pi=(S^\pi_1,S^\pi_2,\ldots,S^\pi_n),
-$$
+$$S^\pi=(S^\pi_1,S^\pi_2,\ldots,S^\pi_n),$$
 
 where every $S^\pi_i$ is itself a sequence or vector of edge decisions.
 
@@ -180,27 +152,19 @@ The node-level RNN provides the initial state of the edge-level RNN. After the e
 
 The probability of a graph-generation sequence is factorized as
 
-$$
-p(S^\pi)=\prod_{i=1}^{n}p\left(S^\pi_i\mid S^\pi_{<i}\right),
-$$
+$$p(S^\pi)=\prod_{i=1}^{n}p\left(S^\pi_i\mid S^\pi_{<i}\right),$$
 
 where
 
-$$
-S^\pi_{<i}=(S^\pi_1,\ldots,S^\pi_{i-1}).
-$$
+$$S^\pi_{<i}=(S^\pi_1,\ldots,S^\pi_{i-1}).$$
 
 Because graphs may have different numbers of nodes, an end-of-sequence symbol is introduced:
 
-$$
-S^\pi_{n+1}=\texttt{EOS}.
-$$
+$$S^\pi_{n+1}=\texttt{EOS}.$$
 
 Therefore,
 
-$$
-p(S^\pi)=\prod_{i=1}^{n+1}p\left(S^\pi_i\mid S^\pi_{<i}\right).
-$$
+$$p(S^\pi)=\prod_{i=1}^{n+1}p\left(S^\pi_i\mid S^\pi_{<i}\right).$$
 
 The EOS symbol indicates that no additional node should be generated.
 
@@ -210,21 +174,15 @@ It is important to distinguish between a node with no edges and termination of t
 
 A graph can be represented by many node orderings. If $\Pi$ denotes the set of permutations of $n$ nodes, then
 
-$$
-|\Pi|=n!.
-$$
+$$|\Pi|=n!.$$
 
 The same graph can correspond to many sequences:
 
-$$
-S^{\pi_1},S^{\pi_2},\ldots,S^{\pi_{n!}}.
-$$
+$$S^{\pi_1},S^{\pi_2},\ldots,S^{\pi_{n!}}.$$
 
 If the ordering is sampled uniformly,
 
-$$
-\pi\sim\mathrm{Uniform}(\Pi),
-$$
+$$\pi\sim\mathrm{Uniform}(\Pi),$$
 
 and the model learns the distribution of the corresponding sequence $S^\pi$.
 
@@ -236,11 +194,7 @@ At generation time:
 
 The graph distribution induced by the sequence model is
 
-$$
-p_{\mathrm{model}}(G)=
-\sum_{S^\pi}p_{\mathrm{model}}(S^\pi)
-\mathbb{I}\!\left[f_G(S^\pi)=G\right],
-$$
+$$p_{\mathrm{model}}(G) = \sum_{S^\pi}p_{\mathrm{model}}(S^\pi) \mathbb{I}\!\left[f_G(S^\pi)=G\right],$$
 
 where $f_G$ reconstructs a graph from its sequence.
 
@@ -250,39 +204,29 @@ In practice, GraphRNN does not enumerate all permutations. It uses sampled order
 
 Let $h_i$ denote the hidden state of the node-level RNN before generating node $i$:
 
-$$
-h_i=f_{\mathrm{node}}(h_{i-1},S^\pi_{i-1}).
-$$
+$$h_i = f_{\mathrm{node}}(h_{i-1},S^\pi_{i-1}).$$
 
 The hidden state $h_i$ summarizes the partial graph generated before node $i$.
 
 The edge-level RNN is initialized from $h_i$:
 
-$$
-z_{i,0}=g_{\mathrm{init}}(h_i),
-$$
+$$z_{i,0}=g_{\mathrm{init}}(h_i),$$
 
 where $z_{i,j}$ is its hidden state while deciding the $j$-th edge of node $i$.
 
 The edge-level recurrence is
 
-$$
-z_{i,j}=f_{\mathrm{edge}}(z_{i,j-1},x_{i,j-1}),
-$$
+$$z_{i,j}=f_{\mathrm{edge}}(z_{i,j-1},x_{i,j-1}),$$
 
 where $x_{i,j-1}$ is a start token or the previous binary edge decision.
 
 The output layer gives
 
-$$
-\hat p_{i,j}=\sigma(W_{\mathrm{edge}}z_{i,j}+b_{\mathrm{edge}}),
-$$
+$$\hat p_{i,j}=\sigma(W_{\mathrm{edge}}z_{i,j}+b_{\mathrm{edge}}),$$
 
 and
 
-$$
-S^\pi_{i,j}\sim\mathrm{Bernoulli}(\hat p_{i,j}).
-$$
+$$S^\pi_{i,j}\sim\mathrm{Bernoulli}(\hat p_{i,j}).$$
 
 The two recurrent modules share parameters across positions. This allows them to process graphs with different numbers of nodes and edges.
 
@@ -290,31 +234,19 @@ The two recurrent modules share parameters across positions. This allows them to
 
 The simplified model, GraphRNN-S, models the adjacency vector of a new node with a multivariate Bernoulli distribution:
 
-$$
-p(S^\pi_i\mid S^\pi_{<i})
-=\prod_{j=1}^{i-1}p(S^\pi_{i,j}\mid S^\pi_{<i}).
-$$
+$$p(S^\pi_i\mid S^\pi_{<i}) = \prod_{j=1}^{i-1}p(S^\pi_{i,j}\mid S^\pi_{<i}).$$
 
 The node-level RNN produces $h_i$, and an output network predicts the Bernoulli parameters:
 
-$$
-\theta_i=\sigma(Wh_i+b).
-$$
+$$\theta_i=\sigma(Wh_i+b).$$
 
 The component $\theta_{i,j}$ represents
 
-$$
-\theta_{i,j}\approx p(S^\pi_{i,j}=1\mid S^\pi_{<i}).
-$$
+$$\theta_{i,j}\approx p(S^\pi_{i,j}=1\mid S^\pi_{<i}).$$
 
 The edge decisions are conditionally independent given the node-level hidden state:
 
-$$
-p(S^\pi_i\mid S^\pi_{<i})
-=\prod_{j=1}^{i-1}
-\theta_{i,j}^{S^\pi_{i,j}}
-(1-\theta_{i,j})^{1-S^\pi_{i,j}}.
-$$
+$$p(S^\pi_i\mid S^\pi_{<i}) = \prod_{j=1}^{i-1} \theta_{i,j}^{S^\pi_{i,j}} (1-\theta_{i,j})^{1-S^\pi_{i,j}}.$$
 
 This model is simple but cannot explicitly condition edge $j$ on decisions for edges $1,\ldots,j-1$ of the same node.
 
@@ -322,37 +254,23 @@ This model is simple but cannot explicitly condition edge $j$ on decisions for e
 
 The full GraphRNN model introduces a second RNN for the edge sequence of each new node:
 
-$$
-p(S^\pi_i\mid S^\pi_{<i})
-=\prod_{j=1}^{i-1}
- p\left(S^\pi_{i,j}\mid S^\pi_{i,<j},S^\pi_{<i}\right),
-$$
+$$p(S^\pi_i\mid S^\pi_{<i}) = \prod_{j=1}^{i-1} p\left(S^\pi_{i,j}\mid S^\pi_{i,<j},S^\pi_{<i}\right),$$
 
 where
 
-$$
-S^\pi_{i,<j}=(S^\pi_{i,1},\ldots,S^\pi_{i,j-1}).
-$$
+$$S^\pi_{i,<j}=(S^\pi_{i,1},\ldots,S^\pi_{i,j-1}).$$
 
 The edge-level RNN is initialized from the node-level state:
 
-$$
-z_{i,0}=g_{\mathrm{init}}(h_i).
-$$
+$$z_{i,0}=g_{\mathrm{init}}(h_i).$$
 
 Then, for $j=1,\ldots,i-1$,
 
-$$
-z_{i,j}=f_{\mathrm{edge}}(z_{i,j-1},x_{i,j-1}),
-$$
+$$z_{i,j}=f_{\mathrm{edge}}(z_{i,j-1},x_{i,j-1}),$$
 
-$$
-\hat p_{i,j}=\sigma(Wz_{i,j}+b),
-$$
+$$\hat p_{i,j}=\sigma(Wz_{i,j}+b),$$
 
-$$
-S^\pi_{i,j}\sim\mathrm{Bernoulli}(\hat p_{i,j}).
-$$
+$$S^\pi_{i,j}\sim\mathrm{Bernoulli}(\hat p_{i,j}).$$
 
 The model can therefore use both:
 
@@ -365,59 +283,37 @@ During training, the target graph sequence is known. The model uses **teacher fo
 
 If
 
-$$
-S^\pi_i=(0,1,1,0),
-$$
+$$S^\pi_i=(0,1,1,0),$$
 
 then the edge-level RNN receives
 
-$$
-\texttt{SOS},0,1,1
-$$
+$$\texttt{SOS},0,1,1$$
 
 and predicts
 
-$$
-0,1,1,0.
-$$
+$$0,1,1,0.$$
 
 For a Bernoulli prediction with target $y\in\{0,1\}$ and predicted probability $\hat y$, the loss is
 
-$$
-\ell_{\mathrm{BCE}}
-=-\left[y\log\hat y+(1-y)\log(1-\hat y)\right].
-$$
+$$\ell_{\mathrm{BCE}} = -\left[y\log\hat y+(1-y)\log(1-\hat y)\right].$$
 
 The total negative log-likelihood is
 
-$$
-\mathcal{L}(\theta)
-=-\sum_{i=1}^{n+1}
-\log p_\theta(S^\pi_i\mid S^\pi_{<i}).
-$$
+$$\mathcal{L}(\theta) = -\sum_{i=1}^{n+1} \log p_\theta(S^\pi_i\mid S^\pi_{<i}).$$
 
 For the full model,
 
-$$
-\mathcal{L}(\theta)
-=-\sum_{i=1}^{n+1}\sum_j
-\log p_\theta(S^\pi_{i,j}
-\mid S^\pi_{i,<j},S^\pi_{<i}),
-$$
+$$\mathcal{L}(\theta) = -\sum_{i=1}^{n+1}\sum_j \log p_\theta(S^\pi_{i,j} \mid S^\pi_{i,<j},S^\pi_{<i}),$$
 
 with masking for nonexistent positions.
 
 During training:
 
-$$
-x_{t-1}=\text{ground-truth previous output}.
-$$
+$$x_{t-1}=\text{ground-truth previous output}.$$
 
 During generation:
 
-$$
-x_{t-1}=\text{sampled previous output}.
-$$
+$$x_{t-1}=\text{sampled previous output}.$$
 
 This difference creates exposure bias: an early generation error can affect all subsequent predictions.
 
@@ -463,9 +359,7 @@ The implementation must distinguish between a node with no incident edges and te
 
 In the naive formulation, node $i$ may make $i-1$ edge decisions. The total number of decisions is
 
-$$
-\sum_{i=1}^{n}(i-1)=\frac{n(n-1)}{2}=O(n^2).
-$$
+$$\sum_{i=1}^{n}(i-1)=\frac{n(n-1)}{2}=O(n^2).$$
 
 Long edge sequences also make learning difficult because:
 
@@ -494,16 +388,11 @@ Consequently, the edge-level model need not inspect all previous nodes.
 
 GraphRNN uses a fixed maximum look-back size $M$. Instead of
 
-$$
-S^\pi_i=(A^\pi_{i,1},\ldots,A^\pi_{i,i-1}),
-$$
+$$S^\pi_i=(A^\pi_{i,1},\ldots,A^\pi_{i,i-1}),$$
 
 use
 
-$$
-S^\pi_i=
-\left(A^\pi_{i,\max(1,i-M)},\ldots,A^\pi_{i,i-1}\right).
-$$
+$$S^\pi_i = \left(A^\pi_{i,\max(1,i-M)},\ldots,A^\pi_{i,i-1}\right).$$
 
 After padding, every edge-level input has dimension $M$.
 
@@ -511,9 +400,7 @@ The value of $M$ is related to the maximum size of a BFS frontier. In the worst 
 
 The approximate generation complexity becomes
 
-$$
-O(Mn)
-$$
+$$O(Mn)$$
 
 instead of $O(n^2)$.
 
@@ -528,9 +415,7 @@ Assume that:
 
 Then the model can approximate
 
-$$
-p(S^\pi_{i,j}\mid S^\pi_{i,<j},S^\pi_{<i}).
-$$
+$$p(S^\pi_{i,j}\mid S^\pi_{i,<j},S^\pi_{<i}).$$
 
 This allows both local and non-local dependencies.
 
@@ -597,53 +482,12 @@ A generated graph set can be compared with a real graph set using:
 
 For a graph statistic $\phi(G)$, compare
 
-$$
-\{\phi(G_1),\ldots,\phi(G_N)\}
-$$
+$$\{\phi(G_1),\ldots,\phi(G_N)\}$$
 
 for real graphs with
 
-$$
-\{\phi(\widetilde G_1),\ldots,\phi(\widetilde G_M)\}
-$$
+$$\{\phi(\widetilde G_1),\ldots,\phi(\widetilde G_M)\}$$
 
 for generated graphs. Distances such as maximum mean discrepancy can then be used to compare the two distributions.
 
 A good generator should reproduce the distribution of structural properties, not merely produce plausible individual graphs.
-
-## 17. Conceptual summary
-
-GraphRNN transforms graph generation into hierarchical sequence generation:
-
-$$
-\text{graph}
-\longrightarrow
-\text{node ordering}
-\longrightarrow
-\text{sequence of adjacency vectors}.
-$$
-
-The probability of the sequence is factorized as
-
-$$
- p(S^\pi)=\prod_i p(S^\pi_i\mid S^\pi_{<i}).
-$$
-
-Each adjacency vector can itself be factorized as
-
-$$
- p(S^\pi_i\mid S^\pi_{<i})
-=\prod_j p(S^\pi_{i,j}\mid S^\pi_{i,<j},S^\pi_{<i}).
-$$
-
-The architecture mirrors this factorization:
-
-- the node-level RNN summarizes the graph generated so far;
-- the edge-level RNN generates the adjacency vector of the current node;
-- teacher forcing is used during training;
-- sampled outputs are fed back during generation;
-- BFS orderings and truncated adjacency vectors improve tractability.
-
-The central insight is:
-
-> Instead of modeling an unordered graph directly, impose a generation order and learn the conditional distribution of the next node and its edges.
