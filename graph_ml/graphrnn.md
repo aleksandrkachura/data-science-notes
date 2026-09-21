@@ -27,12 +27,12 @@ There are two closely related objectives:
 
 Graph generation has an additional difficulty that is absent, or less pronounced, in image and text generation: a graph does not have a canonical representation.
 
-For example, permuting the rows and columns of an adjacency matrix does not change the underlying graph. If $G$ has $n$ nodes, then a node permutation $\pi$ produces an adjacency matrix $A^\pi$, and many different matrices can represent the same graph:
+For example, permuting the rows and columns of an adjacency matrix does not change the underlying graph. If $G$ has $n$ nodes, then a node permutation $\pi$ produces an adjacency matrix $A^{\pi}$, and many different matrices can represent the same graph:
 
 $$
-A^{\pi_1}\neq A^{\pi_2},
+A^{\pi_1} \neq A^{\pi_2},
 \qquad
-A^{\pi_1}\sim A^{\pi_2}.
+A^{\pi_1} \sim A^{\pi_2}.
 $$
 
 Here, $\sim$ means that the two adjacency matrices correspond to the same unlabeled graph.
@@ -71,11 +71,11 @@ At generation step $i$, node $\pi(v_i)$ is added to the partially constructed gr
 
 Define the adjacency vector
 
-$$S_i^\pi = (S^\pi_{i,1}, S^\pi_{i,2},\ldots, S^\pi_{i,i-1}).$$
+$$S_i^{\pi} = (S^{\pi}_{i,1}, S^{\pi}_{i,2}, \ldots, S^{\pi}_{i,i-1}).$$
 
 The $j$-th component is
 
-$$S^\pi_{i,j}=
+$$S^{\pi}_{i,j}=
 \begin{cases}
 1, & \text{if }(\pi(v_i),\pi(v_j))\in E,\\
 0, & \text{otherwise}.
@@ -83,11 +83,11 @@ $$S^\pi_{i,j}=
 
 Therefore,
 
-$$S^\pi_i\in\{0,1\}^{i-1}.$$
+$$S^{\pi}_i \in \{0,1\}^{i-1}.$$
 
-The first node has no previous nodes, so $S^\pi_1=\varnothing$. The complete graph is represented by
+The first node has no previous nodes, so $S^{\pi}_1=\varnothing$. The complete graph is represented by
 
-$$S^\pi=(S^\pi_1,S^\pi_2,\ldots,S^\pi_n).$$
+$$S^{\pi} = (S^{\pi}_1,S^{\pi}_2,\ldots,S^{\pi}_n).$$
 
 For an undirected graph, the sequence uniquely determines the graph once the ordering is fixed.
 
@@ -95,7 +95,7 @@ For an undirected graph, the sequence uniquely determines the graph once the ord
 
 Suppose
 
-$$A^\pi=
+$$A^{\pi}=
 \begin{pmatrix}
 0&1&0&0\\
 1&0&1&1\\
@@ -105,10 +105,10 @@ $$A^\pi=
 
 Then
 
-$$S^\pi_1=\varnothing,
-\qquad S^\pi_2=(1),
-\qquad S^\pi_3=(0,1),
-\qquad S^\pi_4=(0,1,0).$$
+$$S^{\pi}_1=\varnothing,
+\qquad S^{\pi}_2=(1),
+\qquad S^{\pi}_3=(0,1),
+\qquad S^{\pi}_4=(0,1,0).$$
 
 The construction is:
 
@@ -121,11 +121,11 @@ The graph-generation problem has become a sequence-generation problem.
 
 ## 4. The two-level sequence
 
-The sequence $S^\pi$ has a hierarchical structure:
+The sequence $S^{\pi}$ has a hierarchical structure:
 
-$$S^\pi=(S^\pi_1,S^\pi_2,\ldots,S^\pi_n),$$
+$$S^{\pi}=(S^{\pi}_1,S^{\pi}_2,\ldots,S^{\pi}_n),$$
 
-where every $S^\pi_i$ is itself a sequence or vector of edge decisions.
+where every $S^{\pi}_i$ is itself a sequence or vector of edge decisions.
 
 ### Node level
 
@@ -152,19 +152,19 @@ The node-level RNN provides the initial state of the edge-level RNN. After the e
 
 The probability of a graph-generation sequence is factorized as
 
-$$p(S^\pi) = \prod_{i=1}^{n} p(S^\pi_i\mid S^\pi_{<i}),$$
+$$p(S^{\pi}) = \prod_{i=1}^{n} p(S^{\pi}_i\mid S^{\pi}_{<i}),$$
 
 where
 
-$$S^\pi_{<i} = (S^\pi_1, \ldots, S^\pi_{i-1}).$$
+$$S^{\pi}_{<i} = (S^{\pi}_1, \ldots, S^{\pi}_{i-1}).$$
 
 Because graphs may have different numbers of nodes, an end-of-sequence symbol is introduced:
 
-$$S^\pi_{n+1}=\texttt{EOS}.$$
+$$S^{\pi}_{n+1}=\texttt{EOS}.$$
 
 Therefore,
 
-$$p(S^\pi) = \prod_{i=1}^{n+1} p(S^\pi_i \mid S^\pi_{<i}).$$
+$$p(S^{\pi}) = \prod_{i=1}^{n+1} p(S^{\pi}_i \mid S^{\pi}_{<i}).$$
 
 The EOS symbol indicates that no additional node should be generated.
 
@@ -178,23 +178,23 @@ $$|\Pi|=n!.$$
 
 The same graph can correspond to many sequences:
 
-$$S^{\pi_1},S^{\pi_2},\ldots,S^{\pi_{n!}}.$$
+$$S^{\pi_1}, S^{\pi_2}, \ldots, S^{\pi_{n!}}.$$
 
 If the ordering is sampled uniformly,
 
 $$\pi\sim\mathrm{Uniform}(\Pi),$$
 
-and the model learns the distribution of the corresponding sequence $S^\pi$.
+and the model learns the distribution of the corresponding sequence $S^{\pi}$.
 
 At generation time:
 
-1. sample a sequence $S^\pi$;
+1. sample a sequence $S^{\pi}$;
 2. convert it into an adjacency matrix;
 3. interpret the adjacency matrix as a graph.
 
 The graph distribution induced by the sequence model is
 
-$$p_{\mathrm{model}}(G) = \sum_{S^\pi} p_{\mathrm{model}}(S^\pi) \mathbb{I}[f_G(S^\pi)=G],$$
+$$p_{\mathrm{model}}(G) = \sum_{S^{\pi}} p_{\mathrm{model}}(S^{\pi}) \mathbb{I}[f_G(S^{\pi})=G],$$
 
 where $f_G$ reconstructs a graph from its sequence.
 
@@ -204,7 +204,7 @@ In practice, GraphRNN does not enumerate all permutations. It uses sampled order
 
 Let $h_i$ denote the hidden state of the node-level RNN before generating node $i$:
 
-$$h_i = f_{\mathrm{node}}(h_{i-1},S^\pi_{i-1}).$$
+$$h_i = f_{\mathrm{node}}(h_{i-1},S^{\pi}_{i-1}).$$
 
 The hidden state $h_i$ summarizes the partial graph generated before node $i$.
 
@@ -226,7 +226,7 @@ $$\hat p_{i,j}=\sigma(W_{\mathrm{edge}}z_{i,j}+b_{\mathrm{edge}}),$$
 
 and
 
-$$S^\pi_{i,j}\sim\mathrm{Bernoulli}(\hat p_{i,j}).$$
+$$S^{\pi}_{i,j}\sim\mathrm{Bernoulli}(\hat p_{i,j}).$$
 
 The two recurrent modules share parameters across positions. This allows them to process graphs with different numbers of nodes and edges.
 
@@ -234,7 +234,7 @@ The two recurrent modules share parameters across positions. This allows them to
 
 The simplified model, GraphRNN-S, models the adjacency vector of a new node with a multivariate Bernoulli distribution:
 
-$$p(S^\pi_i\mid S^\pi_{<i}) = \prod_{j=1}^{i-1}p(S^\pi_{i,j}\mid S^\pi_{<i}).$$
+$$p(S^{\pi}_i\mid S^{\pi}_{<i}) = \prod_{j=1}^{i-1}p(S^{\pi}_{i,j}\mid S^{\pi}_{<i}).$$
 
 The node-level RNN produces $h_i$, and an output network predicts the Bernoulli parameters:
 
@@ -242,11 +242,11 @@ $$\theta_i=\sigma(Wh_i+b).$$
 
 The component $\theta_{i,j}$ represents
 
-$$\theta_{i,j}\approx p(S^\pi_{i,j}=1\mid S^\pi_{<i}).$$
+$$\theta_{i,j}\approx p(S^{\pi}_{i,j}=1\mid S^{\pi}_{<i}).$$
 
 The edge decisions are conditionally independent given the node-level hidden state:
 
-$$p(S^\pi_i\mid S^\pi_{<i}) = \prod_{j=1}^{i-1} \theta_{i,j}^{S^\pi_{i,j}} (1-\theta_{i,j})^{1-S^\pi_{i,j}}.$$
+$$p(S^{\pi}_i\mid S^{\pi}_{<i}) = \prod_{j=1}^{i-1} \theta_{i,j}^{S^{\pi}_{i,j}} (1-\theta_{i,j})^{1-S^{\pi}_{i,j}}.$$
 
 This model is simple but cannot explicitly condition edge $j$ on decisions for edges $1,\ldots,j-1$ of the same node.
 
@@ -254,11 +254,11 @@ This model is simple but cannot explicitly condition edge $j$ on decisions for e
 
 The full GraphRNN model introduces a second RNN for the edge sequence of each new node:
 
-$$p(S^\pi_i\mid S^\pi_{<i}) = \prod_{j=1}^{i-1} p(S^\pi_{i,j} \mid S^\pi_{i,<j},S^\pi_{<i}),$$
+$$p(S^{\pi}_i\mid S^{\pi}_{<i}) = \prod_{j=1}^{i-1} p(S^{\pi}_{i,j} \mid S^{\pi}_{i,<j},S^{\pi}_{<i}),$$
 
 where
 
-$$S^\pi_{i,<j}=(S^\pi_{i,1},\ldots,S^\pi_{i,j-1}).$$
+$$S^{\pi}_{i,<j}=(S^{\pi}_{i,1},\ldots,S^{\pi}_{i,j-1}).$$
 
 The edge-level RNN is initialized from the node-level state:
 
@@ -270,7 +270,7 @@ $$z_{i,j}=f_{\mathrm{edge}}(z_{i,j-1},x_{i,j-1}),$$
 
 $$\hat p_{i,j}=\sigma(Wz_{i,j}+b),$$
 
-$$S^\pi_{i,j}\sim\mathrm{Bernoulli}(\hat p_{i,j}).$$
+$$S^{\pi}_{i,j}\sim\mathrm{Bernoulli}(\hat p_{i,j}).$$
 
 The model can therefore use both:
 
@@ -283,7 +283,7 @@ During training, the target graph sequence is known. The model uses **teacher fo
 
 If
 
-$$S^\pi_i=(0,1,1,0),$$
+$$S^{\pi}_i=(0,1,1,0),$$
 
 then the edge-level RNN receives
 
@@ -299,11 +299,11 @@ $$\ell_{\mathrm{BCE}} = -[y\log\hat y+(1-y)\log(1-\hat y)].$$
 
 The total negative log-likelihood is
 
-$$\mathcal{L}(\theta) = -\sum_{i=1}^{n+1} \log p_\theta(S^\pi_i\mid S^\pi_{<i}).$$
+$$\mathcal{L}(\theta) = -\sum_{i=1}^{n+1} \log p_\theta(S^{\pi}_i\mid S^{\pi}_{<i}).$$
 
 For the full model,
 
-$$\mathcal{L}(\theta) = -\sum_{i=1}^{n+1}\sum_j \log p_\theta(S^\pi_{i,j} \mid S^\pi_{i,<j},S^\pi_{<i}),$$
+$$\mathcal{L}(\theta) = -\sum_{i=1}^{n+1}\sum_j \log p_\theta(S^{\pi}_{i,j} \mid S^{\pi}_{i,<j},S^{\pi}_{<i}),$$
 
 with masking for nonexistent positions.
 
@@ -388,11 +388,11 @@ Consequently, the edge-level model need not inspect all previous nodes.
 
 GraphRNN uses a fixed maximum look-back size $M$. Instead of
 
-$$S^\pi_i=(A^\pi_{i,1},\ldots,A^\pi_{i,i-1}),$$
+$$S^{\pi}_i=(A^{\pi}_{i,1},\ldots,A^{\pi}_{i,i-1}),$$
 
 use
 
-$$S^\pi_i = (A^\pi_{i,\max(1,i-M)}, \ldots, A^\pi_{i,i-1}).$$
+$$S^{\pi}_i = (A^{\pi}_{i,\max(1,i-M)}, \ldots, A^{\pi}_{i,i-1}).$$
 
 After padding, every edge-level input has dimension $M$.
 
@@ -410,12 +410,12 @@ BFS does not eliminate permutation sensitivity, but it reduces the number of rel
 
 Assume that:
 
-- the node-level RNN can encode $S^\pi_{<i}$;
-- the edge-level RNN can encode $S^\pi_{i,<j}$.
+- the node-level RNN can encode $S^{\pi}_{<i}$;
+- the edge-level RNN can encode $S^{\pi}_{i,<j}$.
 
 Then the model can approximate
 
-$$p(S^\pi_{i,j}\mid S^\pi_{i,<j},S^\pi_{<i}).$$
+$$p(S^{\pi}_{i,j} \mid S^{\pi}_{i,<j}, S^{\pi}_{<i}).$$
 
 This allows both local and non-local dependencies.
 
