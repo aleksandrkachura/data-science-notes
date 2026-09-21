@@ -1517,6 +1517,145 @@ Relationship between the two RNNs:
 - Node-level RNN generates the initial state for edge-level RNN.
 - Edge-level RNN sequentially predict if the new node will connect to each of the previous node.
 
+**FROM THE ORIGINAL PAPER**
+
+Graph is represented in the form of adjacency matrix. Denote by $\pi$ the node ordering (the permutation function) that maps nodes to rows/columns of an adjacency matrix and by $\Pi$ &mdash; the set of all $n!$ possible node permutations. Under a node ordering $\pi$, a graph $G$ can then be represented by the adjacency matrix $A^{\pi}\in\mathbb{R}^{n\times n}$, where $A^\pi_{i,j} = \mathbb{I}[(\pi(v_i),\pi(v_j))\in E]$. Note that elements in the set of adjacency matrices $A^\Pi=\{A^\pi | \pi \in \Pi\}$ all correspond to the same underlying graph.
+
+The goal of *learning generative models of graphs* is to learn a distribution $p_{model}(G)$ over graphs, based on a set of observed graphs $\mathbb{G}=\{G_1,...,G_s\}$ sampled from data distribution $p(G)$, where each graph $G_i$ may have a different number of nodes and edges. 
+When representing $G\in\mathbb{G}$, we further assume that we may observe any node ordering $\pi$ with equal probability, i.e.,
+$p(\pi)=\frac{1}{n!}, \forall \pi \in \Pi$.
+Thus, the generative model needs to be capable of generating graphs where each graph could have exponentially many representations, which is distinct from generative models for images, text, and time series.
+
+#### Modeling graphs as sequences
+Consider a mapping $f_S$ from graphs to sequences, where 
+for a graph $G \sim p(G)$ with $n$ nodes under node ordering $\pi$, we have
+$$
+  S^\pi=f_S(G,\pi)=(S^\pi_1, \ldots ,S^\pi_{n}),
+$$
+where each element $S^\pi_i\in \{0,1\}^{i-1}, i\in \{1,...,n\}$ is an adjacency vector representing the edges between node $\pi(v_{i})$ and the previous nodes $\pi(v_{j}), j\in \{1,...,i-1\}$ already in the graph (we prohibit self-loops and  $S^\pi_1$ is defined as an empty vector):
+For undirected graphs, $S^\pi$ determines a unique graph $G$, and we write the mapping as $f_G(\cdot)$ where $f_G(S^{\pi})=G$. 
+
+Thus, instead of learning $p(G)$, whose sample space cannot be easily characterized, 
+we sample the auxiliary $\pi$ to get the observations of $S^\pi$ and learn $p(S^\pi)$, which can be modeled autoregressively due to the sequential nature of $S^\pi$.
+At inference time, we can sample $G$ without explicitly computing $p(G)$ by sampling $S^\pi$, which
+maps to $G$ via $f_G$.
+
+Given the above definitions, we can write $p(G)$ as the marginal distribution of the joint distribution $p(G,S^\pi)$:
+$$p(G) = \sum_{S^\pi}{ p(S^\pi) \ \mathbf{1}[f_G(S^\pi)=G]},$$
+where $p(S^\pi)$ is the distribution that we want to learn using a generative model.
+Due to the sequential nature of $S^\pi$, we further decompose $p(S^\pi)$ as the product of conditional distributions over the elements: 
+$$p(S^\pi) = \prod_{i=1}^{n+1}{p(S^\pi_i|S^\pi_1,...,S^\pi_{i-1})}.$$
+
+$S^\pi_{n+1}$ is set to $\texttt{EOS}$ as the end of sequence to represent sequences of variable length.
+
+#### The GraphRNN framework
+So far we have transformed the modeling of $p(G)$ to modeling $p(S^{\pi})$, which we further decomposed into the product of conditional probabilities $p(S^\pi_i|S^\pi_{<i})$. Note that $p(S^\pi_i|S^\pi_{<i})$ is highly complex as it has to capture how node $\pi(v_i)$ links to previous nodes based on how previous nodes are interconnected among each other.
+%
+Here we propose to parameterize $p(S^\pi_i|S^\pi_{<i})$ using expressive neural networks to model the complex distribution. To achieve scalable modeling, we let the neural networks share weights across all time steps $i$.
+
+In particular, we use an RNN that consists of a *state-transition function* and an *output function*:
+$$
+\begin{align}
+  h_i &= f_{\mathrm{trans}}({h}_{i-1}, S^\pi_{i-1}),\\
+  \theta_{i} &= f_{\mathrm{out}}({h}_i),
+\end{align}
+$$
+where $ h_i \in \R^{d}$ is a vector that encodes the state of the graph generated so far, $S^\pi_{i-1}$ is the adjacency vector for the most recently generated node $i-1$, and $\theta_i$ specifies the distribution of next node's adjacency vector (i.e., $S^{\pi}_i \sim \mathcal{P}_{\theta_i}$).
+In general, $f_{\mathrm{trans}}$ and $f_{\mathrm{out}}$ can be arbitrary neural networks, and $\mathcal{P}_{\theta_i}$ can be an arbitrary distribution over binary vectors. 
+This general framework is summarized in the algorithm:
+\begin{algorithm}[t]
+\begin{algorithmic}
+   \STATE {\bfseries Input:} RNN-based transition module $f_{trans}$, output module $f_{out}$, probability distribution $\mathcal{P}_{\theta_i}$ parameterized by $\theta_i$, start token $\texttt{SOS}$, end token $\texttt{EOS}$, empty graph state $h'$
+   \STATE {\bfseries Output:} Graph sequence $S^{\pi}$
+   \STATE $S^{\pi}_1=\texttt{SOS}$, $h_1 =  h'$, $i=1$ 
+   \REPEAT
+   \STATE $i=i+1$
+   \STATE $h_i = f_{\mathrm{trans}}( h_{i-1},S^{\pi}_{i-1})$ \COMMENT{update graph state}
+   \STATE $\theta_i = f_{\mathrm{out}}(h_i)$
+   \STATE $S^{\pi}_i \sim \mathcal{P}_{\theta_i}$ \COMMENT{sample node $i$'s edge connections}
+   \UNTIL{$S^{\pi}_i$ is $\texttt{EOS}$}
+   \STATE {\bfseries Return} $S^{\pi}=(S^{\pi}_1,...,S^{\pi}_i)$
+\end{algorithmic}
+\end{algorithm}
+
+#### GraphRNN variants
+Different variants of the GraphRNN model correspond to different assumptions about $p(S^\pi_i|S^\pi_{<i})$. Recall that each dimension of $S^\pi_i$ is a binary value that models existence of an edge between the new node $\pi(v_{i})$ and a previous node $\pi(v_{j}),j\in \{1,...,i-1\}$.
+We propose two variants of GraphRNN, both of which implement the transition function $f_{\mathrm{trans}}$ (i.e., the graph-level RNN) as a Gated Recurrent Unit (GRU) but differ in the implementation of $f_{\mathrm{out}}$ (i.e., the edge-level model).
+Both variants are trained using stochastic gradient descent with a maximum likelihood loss over $S^\pi$ &mdash; i.e., we optimize the parameters of the neural networks to optimize $\prod{p_{model}(S^\pi)}$ over all observed graph sequences.
+%further discuss some improvement of $S^\pi_i$'s design so that $p_{model}(S^\pi)$ can be more tractably learned.
+
+##### Multivariate Bernoulli
+First we present a simple baseline variant GraphRNN-S (``S'' for ``simplified''). 
+In this variant, $p(S^\pi_i|S^\pi_{<i})$ is modeled as a multivariate Bernoulli distribution, parameterized by the $\theta_i\in \mathbb{R}^{i-1}$ vector that is output by $f_{\mathrm{out}}$. 
+In particular, $f_{\mathrm{out}}$ is implemented as single layer MLP with
+sigmoid activation function, that shares weights across all time steps. 
+The output of $f_{\mathrm{out}}$ is a vector $\theta_i$, whose element $\theta_{i}[j]$ can be interpreted as a probability of edge $(i,j)$. 
+Edges are then sampled in $S^\pi_i$  (independently) according to a multivariate Bernoulli distribution parametrized by $\theta_i$.
+
+##### Dependent Bernoulli sequence
+To fully capture complex edge dependencies, in the full model $p(S^\pi_i|S^\pi_{<i})$ is further decomposed into a product of conditionals,
+$$
+  p(S^\pi_i|S^\pi_{<i}) = \prod_{j=1}^{i-1} p(S^\pi_{i,j} | S^\pi_{i,<j}, S^\pi_{<i}),
+$$
+where $S^\pi_{i, j}$ denotes a binary scalar that is $1$ if node $\pi(v_{i+1})$ is connected to node $\pi(v_{j})$ (under ordering $\pi$). 
+In this variant, each distribution in the product is approximated by an another RNN. 
+Conceptually, we have a hierarchical RNN, where the first (i.e., the graph-level) RNN generates the nodes and maintains the state of the graph, while the second (i.e., the edge-level) RNN generates the edges of a given node. 
+In our implementation, the edge-level RNN is a GRU model, where the hidden state is initialized via the graph-level hidden state $h_i$ and where the output at each step is mapped by a MLP to a scalar indicating the probability of having an edge. $S^\pi_{i, j}$ is sampled from this distribution specified by the $j$th output of the $i$th edge-level RNN, and is fed into the $j+1$th input of the same RNN. All edge-level RNNs share the same parameters.
+
+
+#### Tractability via breadth-first search
+**NB:** RNNs require fixed-size input vectors, while we previously defined $S^\pi_i$ as having varying dimensions depending on $i$. An efficient and flexible scheme to address this issue is based on breadth-first-search (BFS).
+
+Rather than learning to generate graphs under any possible node permutation, BFS node orderings can be used to learn to generate graphs without a loss of generality. Formally, we modify the equation $$S^\pi=f_S(G,\pi)=(S^\pi_1, \ldots, S^\pi_{n})$$ to
+$$S^\pi=f_S(G,\text{BFS}(G,\pi)),$$
+where $\text{BFS}(\cdot)$ denotes the deterministic BFS function.
+In particular, this BFS function takes a random permutation $\pi$ as input, picks $\pi(v_1)$ as the starting node and appends the neighbors of a node into the BFS queue in the order defined by $\pi$.
+Note that the BFS function is many-to-one, i.e., multiple permutations can map to the same ordering after applying the BFS function. 
+
+**Benefits of using BFS to specify the node ordering during generation:**
+- We only need to train on all possible BFS orderings rather than on all possible node permutations. In other words, multiple node permutations map to the same BFS ordering, reducing the overall number of sequences we need to consider. In the worst case &mdash; for example, for star graphs &mdash; the number of BFS orderings is $n!$; however, we observe substantial reductions for many real-world graphs.  
+- The BFS ordering makes learning easier by reducing the number of edge predictions we need to make in the edge-level RNN; in particular,  when we are adding a new node under a BFS ordering, the only possible edges for this new node are those connecting to nodes that are in the ``frontier'' of the BFS (i.e., nodes that are still in the BFS queue)---a notion formalized by Proposition: Suppose $v_1, \ldots, v_n$ is a BFS ordering of $n$ nodes in graph $G$, and $(v_i, v_{j-1}) \in E$ but $(v_i, v_j) \not \in E$ for some $i < j \le n$,  then $(v_{i'}, v_{j'}) \not \in E$, $\forall 1 \le i' \le i$ and $j \le j' < n$.
+
+Importantly, this insight allows us to redefine the variable size $S^\pi_i$ vector as a fixed $M$-dimensional vector, representing the connectivity between node $\pi(v_i)$ and nodes in the current BFS queue with maximum size $M$:
+$$S^\pi_i = (A^\pi_{\max(1,i-M),i}, \ldots,A^\pi_{i-1,i})^T, i\in \{2, \ldots, n\}.$$
+
+We can bound $M$ as follows:
+With a BFS ordering the maximum number of entries that GraphRNN needs to predict for $S^\pi_i$, $\forall 1 \le i \le n$ is 
+$O\left(\max_{d=1}^{\mathrm{diam}(G)} \left|\left\{v_i | \mathrm{dist}(v_i, v_1) = d\right\} \right| \right)$,
+where $\mathrm{dist}$ denotes the shortest-path-distance between vertices. 
+
+The overall time complexity of GraphRNN is thus $O(Mn)$.
+
+
+#### Model Capacity
+This section analyzes the representational capacity of GraphRNN, illustrating how it is able to capture complex edge dependencies. 
+In particular, we discuss two very different cases on how GraphRNN can learn to generate graphs with a *global community structure* as well as graphs with a very *regular geometric structure*.
+For simplicity, we assume that $h_i$ (the hidden state of the graph-level RNN) can exactly encode $S^\pi_{<i}$, and that the edge-level RNN can encode $S^\pi_{i,<j}$.
+That is, we assume that our RNNs can maintain memory of the decisions they make and elucidate the models capacity in this ideal case.
+We similarly rely on the universal approximation theorem of neural networks.
+
+
+##### Graphs with community structure
+GraphRNN can model structures that are specified by a given probabilistic model. This is because the posterior of a new edge probability can be expressed as a function of the outcomes of previous nodes.
+For instance, suppose that the training set contains graphs generated from the following distribution $p_{com}(G)$: half of the nodes are in community $A$, and half of the nodes are in community $B$ (in expectation), and nodes are connected with probability $p_s$ within each community and probability $p_d$ between communities.
+Given such a model, we have the following key (inductive) observation:
+\begin{observation}\label{obs:com}
+Assume there exists a parameter setting for GraphRNN such that it can generate $S^\pi_{<i}$ and $S^\pi_{i,<j}$ according to the distribution over $S^\pi$  implied by  $p_{com}(G)$, then there also exists a parameter setting for GraphRNN such that it can output $p(S^\pi_{i, j} | S^\pi_{i, <j}, S^\pi_{<i})$ according to $p_{com}(G)$. 
+\end{observation}
+This observation follows from three facts:
+First, we know that $p(S^\pi_{i, j} | S^\pi_{i, <j}, S^\pi_{<i})$ can be expressed as a function of $p_s$, $p_d$, and $p(\pi(v_j) \in A), p(\pi(v_j) \in B) \: \forall 1 \leq j \le i$ (which holds by $p_{com}$'s definition).
+Second, by our earlier assumptions on the RNN memory, $S^\pi_{<i}$ can be encoded into the initial state of the edge-level RNN, and the edge-level RNN can also encode the outcomes of $S^\pi_{i,<j}$.
+Third, we know that $p(\pi(v_i) \in A)$ is computable from $S^\pi_{<i}$ and $S^\pi_{i,1}$ (by Bayes' rule and $p_{com}$'s definition, with an analogous result for $p(\pi(v_i) \in B)$). 
+Finally, GraphRNN can handle the  base case of the induction in Observation \ref{obs:com}, i.e., $S_{i,1}$, simply by sampling according to $0.5p_s + 0.5p_d$ at the first step of the edge-level RNN (i.e., 0.5 probability $i$ is in same community as node $\pi(v_1)$). 
+
+##### Graphs with regular structure
+GraphRNN can also naturally learn to generate regular structures, due to its ability to learn functions that only activate for $S^\pi_{i, j}$ where $v_j$ has specific degree. 
+For example, suppose that the training set consists of ladder graphs.
+To generate a ladder graph, the edge-level RNN must handle three key cases: if $\sum_{k=1}^{j}S^\pi_{i,j} = 0$, then the new node should only connect to the degree $1$ node or else any degree $2$ node; if $\sum_{k=1}^{j}S^\pi_{i,j} = 1$, then the new node should only connect to the degree $2$ node that is exactly two hops away; and finally, if $\sum_{k=1}^{j}S^\pi_{i,j} = 2$ then the new node should make no further connections. 
+And note that all of the statistics needed above are computable from $S^\pi_{<i}$ and $S^\pi_{i,<j}$. 
+
+---
+
 ### GraphVAE
 ### Generative Diffusion Models on Graphs
 <!--
